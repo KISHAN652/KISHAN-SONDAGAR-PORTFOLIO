@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "public": true,
+  "builds": [
+    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "css/*.css", "use": "@vercel/static" },
+    { "src": "js/*.js", "use": "@vercel/static" },
+    { "src": "*.xml", "use": "@vercel/static" },
+    { "src": "robots.txt", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
