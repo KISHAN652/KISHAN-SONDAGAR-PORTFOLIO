@@ -16,6 +16,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/chatbot.css">
 </head>
 
 <body>
@@ -274,7 +275,7 @@
                 <!-- Project 5 -->
                 <div class="project-card">
                     <div class="project-img">
-                        <i class="fas fa-tasks"></i>
+                        <i class="fas fa-mouse-pointer"></i>
                     </div>
                     <div class="project-content">
                         <h3>Micro-Interaction-Gallery-Website</h3>
@@ -298,7 +299,7 @@
                 <!-- Project 6 -->
                 <div class="project-card">
                     <div class="project-img">
-                        <i class="fas fa-tasks"></i>
+                        <i class="fas fa-briefcase"></i>
                     </div>
                     <div class="project-content">
                         <h3>Job-Portal UI</h3>
@@ -323,7 +324,7 @@
                 <!-- Project 7 -->
                 <div class="project-card">
                     <div class="project-img">
-                        <i class="fas fa-tasks"></i>
+                        <i class="fas fa-music"></i>
                     </div>
                     <div class="project-content">
                         <h3>Spotify Web Player Ui Clone</h3>
@@ -346,7 +347,7 @@
                 <!-- Project 8 -->
                 <div class="project-card">
                     <div class="project-img">
-                        <i class="fas fa-tasks"></i>
+                        <i class="fas fa-code"></i>
                     </div>
                     <div class="project-content">
                         <h3>Online Code Editor</h3>
@@ -368,7 +369,7 @@
                 <!-- Project 9 -->
                 <div class="project-card">
                     <div class="project-img">
-                        <i class="fas fa-tasks"></i>
+                        <i class="fas fa-wallet"></i>
                     </div>
                     <div class="project-content">
                         <h3>Expense Tracker</h3>
@@ -392,7 +393,7 @@
                 <!-- Project 10 -->
                 <div class="project-card">
                     <div class="project-img">
-                        <i class="fas fa-tasks"></i>
+                        <i class="fas fa-tachometer-alt"></i>
                     </div>
                     <div class="project-content">
                         <h3>Admin Dashboard</h3>
@@ -567,6 +568,29 @@
         </div>
     </footer>
     <script src="js/script.js"></script>
+    <script src="js/chatbot.js"></script>
+
+    <!-- Chatbot Components -->
+    <button class="chatbot-toggler">
+        <i class="fas fa-comment-dots"></i>
+        <i class="fas fa-times"></i>
+    </button>
+
+    <div class="chatbot-container">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <h3 class="chat-header-title">Kishan's Assistant</h3>
+                <span class="chat-header-status"><span class="status-dot"></span> Online</span>
+            </div>
+            <button class="chat-close-btn"><i class="fas fa-chevron-down"></i></button>
+        </div>
+        <div class="chat-body">
+            <!-- Messages will be inserted here -->
+        </div>
+        <div class="chat-suggestions">
+            <!-- Quick Questions Chips -->
+        </div>
+    </div>
 </body>
 
 </html>
