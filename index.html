@@ -33,6 +33,7 @@
                     <li><a href="#projects">Projects</a></li>
                     <li><a href="#education">Education</a></li>
                     <li><a href="#resume">Resume</a></li>
+                    <li><a href="#hire-me">Hire Me</a></li>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
 
@@ -53,6 +54,7 @@
                 <a href="#projects">Projects</a>
                 <a href="#education">Education</a>
                 <a href="#resume">Resume</a>
+                <a href="#hire-me">Hire Me</a>
                 <a href="#contact">Contact</a>
                 <!-- Dark Mode Toggle inside Mobile Menu -->
                 <button class="mobile-theme-toggle" id="mobileThemeToggle">
@@ -474,6 +476,36 @@
             </div>
         </div>
     </section>
+    <!-- Hire Me Section -->
+    <section id="hire-me" class="hire-me">
+        <div class="container">
+            <div class="section-title">
+                <h2>Hire Me</h2>
+            </div>
+            <div class="hire-me-form">
+                <form id="hireMeForm" action="https://formspree.io/f/xjgywnqr" method="POST">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required placeholder="Your Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="Your Email">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" required placeholder="How can I help you?"></textarea>
+                    </div>
+                    <button type="submit" class="btn form-submit-btn">
+                        <span class="btn-text">Send Message</span>
+                        <div class="loading-spinner"></div>
+                    </button>
+                    <div class="form-message" id="formMessage"></div>
+                </form>
+            </div>
+        </div>
+    </section>
+
     <!-- Contact Section -->
     <section id="contact" class="contact">
         <div class="container">
@@ -562,7 +594,8 @@
                 <a href="#" class="logo">Kishan-Portfolio</a>
                 <p>Passionate web developer focused on creating exceptional digital experiences</p>
                 <div class="copyright">
-                    &copy; <span id="currentYear"></span> Kishan Sondagar | Web Developer Portfolio. All rights reserved.
+                    &copy; <span id="currentYear"></span> Kishan Sondagar | Web Developer Portfolio. All rights
+                    reserved.
                 </div>
             </div>
         </div>
