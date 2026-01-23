@@ -17,7 +17,6 @@ function initializeApp() {
     initTypingEffect();
     initCursorTrail();
     setCurrentYear();
-    initResumeDownload();
     initMobileDarkModeToggle();
     initCloseMenuOnOutsideClick();
     initResponsiveThemeToggle();
@@ -543,23 +542,9 @@ function setCurrentYear() {
 }
 
 // ========================================
-// RESUME DOWNLOAD
+// RESUME BUTTONS (No JS needed - native browser behavior)
 // ========================================
 
-function initResumeDownload() {
-    const downloadBtn = document.getElementById('downloadResume');
-
-    if (!downloadBtn) return;
-
-    downloadBtn.addEventListener('click', () => {
-        // Small success animation (no preventDefault)
-        downloadBtn.classList.add('downloading');
-
-        setTimeout(() => {
-            downloadBtn.classList.remove('downloading');
-        }, 800);
-    });
-}
 
 // ========================================
 // FLOATING ACTION BUTTON - SCROLL TO TOP
@@ -671,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const action = hireMeForm.getAttribute('action');
 
                 if (!action || action.includes('YOUR_FORM_ID')) {
-                    throw new Error('Please configure your Formspree Form ID in index.html');
+                    throw new Error('⚠️ Please configure your Formspree Form ID in index.html');
                 }
 
                 const response = await fetch(action, {
@@ -685,25 +670,49 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    formMessage.textContent = 'Message sent successfully!';
+                    formMessage.textContent = `🎉 Thank you, ${formData.name}! Your message has been sent successfully. I'll get back to you soon!`;
                     formMessage.classList.add('success');
-                    formMessage.style.display = 'block';
+                    formMessage.style.display = 'flex';
                     hireMeForm.reset();
+
+                    // Scroll to message smoothly
+                    setTimeout(() => {
+                        formMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 100);
+
+                    // Auto-hide success message after 8 seconds
+                    setTimeout(() => {
+                        formMessage.style.opacity = '0';
+                        formMessage.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            formMessage.style.display = 'none';
+                            formMessage.style.opacity = '1';
+                            formMessage.style.transform = 'translateY(0)';
+                        }, 300);
+                    }, 8000);
                 } else {
                     if (Object.hasOwn(data, 'errors')) {
-                        throw new Error(data.errors.map(error => error.message).join(", "));
+                        throw new Error('❌ ' + data.errors.map(error => error.message).join(", "));
                     } else {
-                        throw new Error('Oops! There was a problem submitting your form');
+                        throw new Error('❌ Oops! There was a problem submitting your form. Please try again.');
                     }
                 }
             } catch (error) {
                 console.error('Submission Error:', error);
-                formMessage.textContent = error.message || 'Something went wrong. Please try again.';
+                formMessage.textContent = error.message || '❌ Something went wrong. Please try again or contact me directly.';
                 formMessage.classList.add('error');
-                formMessage.style.display = 'block';
+                formMessage.style.display = 'flex';
+
+                // Scroll to error message
+                setTimeout(() => {
+                    formMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
             } finally {
-                submitBtn.classList.remove('loading');
-                submitBtn.disabled = false;
+                // Remove loading state with delay for better UX
+                setTimeout(() => {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }, 600);
             }
         });
     }
