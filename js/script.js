@@ -56,11 +56,11 @@ function initThemeToggle() {
 function updateThemeIcon(theme) {
     const icon = document.querySelector('#themeToggle i');
     const mobileIcon = document.querySelector('#mobileThemeToggle i');
-    
+
     if (icon) {
         icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     }
-    
+
     if (mobileIcon) {
         mobileIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     }
@@ -80,7 +80,7 @@ function updateMobileThemeIcon(theme) {
 function initMobileDarkModeToggle() {
     const mobileThemeToggle = document.getElementById('mobileThemeToggle');
     const html = document.documentElement;
-    
+
     if (!mobileThemeToggle) return;
 
     mobileThemeToggle.addEventListener('click', () => {
@@ -146,9 +146,9 @@ function initCloseMenuOnOutsideClick() {
     document.addEventListener('click', (e) => {
         const mobileNav = document.getElementById('mobileNav');
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        
-        if (mobileNav && mobileNav.classList.contains('active') && 
-            !mobileNav.contains(e.target) && 
+
+        if (mobileNav && mobileNav.classList.contains('active') &&
+            !mobileNav.contains(e.target) &&
             !mobileMenuBtn.contains(e.target)) {
             mobileNav.classList.remove('active');
             const icon = mobileMenuBtn.querySelector('i');
@@ -166,7 +166,7 @@ function initResponsiveThemeToggle() {
     const html = document.documentElement;
     const currentTheme = html.getAttribute('data-theme');
     updateThemeIcon(currentTheme);
-    
+
     // Handle window resize to update icons
     window.addEventListener('resize', () => {
         const currentTheme = html.getAttribute('data-theme');
@@ -259,7 +259,7 @@ function initSmoothScroll() {
                     top: offsetTop,
                     behavior: 'smooth'
                 });
-                
+
                 // Close mobile menu if open
                 const mobileNav = document.getElementById('mobileNav');
                 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -638,3 +638,73 @@ window.addEventListener('load', () => {
 console.log('%c🚀 Premium Portfolio', 'color: #6366f1; font-size: 24px; font-weight: bold;');
 console.log('%c✨ Designed with passion and modern web technologies', 'color: #ec4899; font-size: 14px;');
 console.log('%cLooking to hire? Let\'s connect!', 'color: #8b5cf6; font-size: 12px;');
+
+/* ========================================
+   HIRE ME FORM HANDLING
+   ======================================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+    const hireMeForm = document.getElementById('hireMeForm');
+    const formMessage = document.getElementById('formMessage');
+    const submitBtn = document.querySelector('.form-submit-btn');
+
+    if (hireMeForm) {
+        hireMeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Reset message
+            formMessage.style.display = 'none';
+            formMessage.className = 'form-message';
+
+            // Loading state
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                message: document.getElementById('message').value
+            };
+
+            try {
+                // Get the action URL from the form attribute or use a placeholder
+                const action = hireMeForm.getAttribute('action');
+
+                if (!action || action.includes('YOUR_FORM_ID')) {
+                    throw new Error('Please configure your Formspree Form ID in index.html');
+                }
+
+                const response = await fetch(action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    body: new FormData(hireMeForm)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    formMessage.textContent = 'Message sent successfully!';
+                    formMessage.classList.add('success');
+                    formMessage.style.display = 'block';
+                    hireMeForm.reset();
+                } else {
+                    if (Object.hasOwn(data, 'errors')) {
+                        throw new Error(data.errors.map(error => error.message).join(", "));
+                    } else {
+                        throw new Error('Oops! There was a problem submitting your form');
+                    }
+                }
+            } catch (error) {
+                console.error('Submission Error:', error);
+                formMessage.textContent = error.message || 'Something went wrong. Please try again.';
+                formMessage.classList.add('error');
+                formMessage.style.display = 'block';
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        });
+    }
+});
