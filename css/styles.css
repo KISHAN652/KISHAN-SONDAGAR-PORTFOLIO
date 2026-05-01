@@ -3893,7 +3893,9 @@ textarea {
 }
 
 @media (max-width: 680px) {
-  .hero-orbit { display: none; }
+  .hero-orbit,
+  .hero-center-chart,
+  .hero-round-chart { display: none; }
 
   .chatbot-panel {
     width: calc(100% - 24px);
