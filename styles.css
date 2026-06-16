@@ -7234,7 +7234,13 @@ section,
 
   /* Disable heavy background keyframe animations on mobile/tablet */
   .site-bg,
-  .site-bg-sweep {
+  .site-bg-sweep,
+  .personal-projects-section::before,
+  .process-section::before,
+  .contact-section::before,
+  .experience-section::before,
+  .site-footer::before,
+  .certificates-section::before {
     animation: none !important;
   }
 
