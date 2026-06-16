@@ -787,17 +787,43 @@ function setupChatbot() {
   });
 
   // Hide chatbot when scrolled to the absolute bottom to prevent obstructing "Back to top" button
-  const updateChatbotVisibility = () => {
+  let chatbotScrollTimeout;
+  let lastVisibilityState = null;
+
+  const updateChatbotVisibility = (event) => {
     const isLargeScreen = window.innerWidth > 900;
     if (!isLargeScreen) {
-      chatbot.classList.remove("is-hidden-footer");
+      if (lastVisibilityState !== "visible") {
+        chatbot.classList.remove("is-hidden-footer");
+        lastVisibilityState = "visible";
+      }
       return;
     }
-    const isAtBottom = window.scrollY > 100 && (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 150);
-    chatbot.classList.toggle("is-hidden-footer", isAtBottom);
+
+    if (event && event.type === "scroll") {
+      if (!chatbotScrollTimeout) {
+        window.requestAnimationFrame(() => {
+          const isAtBottom = window.scrollY > 100 && (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 150);
+          const nextState = isAtBottom ? "hidden" : "visible";
+          if (lastVisibilityState !== nextState) {
+            chatbot.classList.toggle("is-hidden-footer", isAtBottom);
+            lastVisibilityState = nextState;
+          }
+          chatbotScrollTimeout = false;
+        });
+        chatbotScrollTimeout = true;
+      }
+    } else {
+      const isAtBottom = window.scrollY > 100 && (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 150);
+      const nextState = isAtBottom ? "hidden" : "visible";
+      if (lastVisibilityState !== nextState) {
+        chatbot.classList.toggle("is-hidden-footer", isAtBottom);
+        lastVisibilityState = nextState;
+      }
+    }
   };
 
-  window.addEventListener("scroll", updateChatbotVisibility);
+  window.addEventListener("scroll", updateChatbotVisibility, { passive: true });
   window.addEventListener("resize", updateChatbotVisibility);
   updateChatbotVisibility();
 }
