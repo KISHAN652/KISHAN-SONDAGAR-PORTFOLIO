@@ -7254,9 +7254,46 @@ section,
     mask-image: none !important;
     -webkit-mask-image: none !important;
   }
+
+  /* Redesign "Currently focused on" section (intro-band) for tablet */
+  .intro-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+    padding: 24px 0 !important;
+    justify-items: center !important;
+  }
+
+  .intro-grid p {
+    grid-column: span 2 !important;
+    text-align: center !important;
+    font-size: 1rem !important;
+  }
+
+  .intro-grid p span {
+    margin: 0 auto 12px auto !important;
+    display: block !important;
+    width: max-content !important;
+  }
+
+  .intro-grid a {
+    width: 100% !important;
+    max-width: 290px !important;
+    justify-content: center !important;
+  }
 }
 
 @media (max-width: 680px) {
+  /* Redesign "Currently focused on" section for mobile */
+  .intro-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 20px 0 !important;
+  }
+
+  .intro-grid p {
+    grid-column: auto !important;
+  }
+
   .chatbot {
     right: 18px !important;
     bottom: 24px !important;
