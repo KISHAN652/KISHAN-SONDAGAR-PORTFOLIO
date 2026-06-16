@@ -807,6 +807,12 @@ function setupParticles() {
   if (!container) return;
 
   const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+  if (viewportWidth <= 900) {
+    // Disable particles entirely on mobile/tablet to boost performance and eliminate scroll lag
+    container.style.display = "none";
+    return;
+  }
+
   const particleScale = viewportWidth <= 680 ? 0.28 : viewportWidth <= 900 ? 0.42 : 1;
   
   // Reduced counts: Ring 1 (50->20), Ring 2 (80->35), Ring 3 (120->50) to lower DOM overhead
