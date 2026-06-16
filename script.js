@@ -435,29 +435,151 @@ function setupProjects() {
 }
 
 function setupNavigation() {
-  navToggle?.addEventListener("click", () => {
+  navToggle?.addEventListener("click", (e) => {
+    e.stopPropagation();
     const isOpen = nav.classList.toggle("is-open");
     navToggle.setAttribute("aria-expanded", String(isOpen));
+    document.body.classList.toggle("menu-is-open", isOpen);
   });
 
   nav?.addEventListener("click", () => {
     nav.classList.remove("is-open");
     navToggle?.setAttribute("aria-expanded", "false");
+    document.body.classList.remove("menu-is-open");
+  });
+
+  const backdrop = document.querySelector("[data-menu-backdrop]");
+  backdrop?.addEventListener("click", () => {
+    nav.classList.remove("is-open");
+    navToggle?.setAttribute("aria-expanded", "false");
+    document.body.classList.remove("menu-is-open");
+  });
+
+  document.querySelector(".brand")?.addEventListener("click", () => {
+    nav.classList.remove("is-open");
+    navToggle?.setAttribute("aria-expanded", "false");
+    document.body.classList.remove("menu-is-open");
   });
 
   const sections = [...document.querySelectorAll("main section[id]")];
   const navLinks = [...document.querySelectorAll(".site-nav a")];
 
+  // Optimize header scrolled class toggle with requestAnimationFrame
+  let scrollTimeout;
   window.addEventListener("scroll", () => {
-    header?.classList.toggle("is-scrolled", window.scrollY > 12);
-    let current = null;
-    sections.forEach((section) => {
-      if (section.getBoundingClientRect().top <= 130) current = section;
-    });
+    if (!scrollTimeout) {
+      window.requestAnimationFrame(() => {
+        header?.classList.toggle("is-scrolled", window.scrollY > 12);
+        scrollTimeout = false;
+      });
+      scrollTimeout = true;
+    }
+  }, { passive: true });
+
+  // Setup Dynamic Sliding Indicator for Desktop
+  let indicator = nav?.querySelector(".nav-indicator");
+  if (nav && !indicator) {
+    indicator = document.createElement("span");
+    indicator.className = "nav-indicator";
+    nav.appendChild(indicator);
+  }
+
+  function updateIndicator(target) {
+    if (!indicator) return;
+    
+    // On mobile viewports, don't show or position the sliding indicator
+    if (window.innerWidth <= 1120) {
+      indicator.style.opacity = "0";
+      return;
+    }
+
+    if (!target) {
+      // Find active link if nothing hovered
+      const activeLink = nav.querySelector("a.is-active");
+      if (activeLink) {
+        target = activeLink;
+      } else {
+        indicator.style.opacity = "0";
+        return;
+      }
+    }
+
+    // Use relative positioning offsets (offsetLeft, offsetWidth, offsetHeight, offsetTop)
+    // to calculate indicator position relative to its parent container (.site-nav)
+    const left = target.offsetLeft;
+    const top = target.offsetTop;
+    const width = target.offsetWidth;
+    const height = target.offsetHeight;
+
+    indicator.style.left = `${left}px`;
+    indicator.style.top = `${top}px`;
+    indicator.style.width = `${width}px`;
+    indicator.style.height = `${height}px`;
+    indicator.style.opacity = "1";
+  }
+
+  if (navLinks.length > 0) {
     navLinks.forEach((link) => {
-      link.classList.toggle("is-active", current && link.getAttribute("href") === `#${current.id}`);
+      link.addEventListener("mouseenter", () => updateIndicator(link));
+      link.addEventListener("mouseleave", () => updateIndicator(null));
     });
-  });
+
+    // Recalculate on window resize
+    window.addEventListener("resize", () => {
+      updateIndicator(null);
+    });
+
+    // Monitor is-active changes (e.g. from ScrollSpy) to slide the indicator automatically
+    const observer = new MutationObserver(() => {
+      // Only trigger updates if the user is not actively hovering over any nav link
+      const isHovered = nav.querySelector("a:hover");
+      if (!isHovered) {
+        updateIndicator(null);
+      }
+    });
+
+    navLinks.forEach((link) => {
+      observer.observe(link, { attributes: true, attributeFilter: ["class"] });
+    });
+
+    // Initialize position after a short delay to ensure layout has computed
+    setTimeout(() => {
+      updateIndicator(null);
+    }, 150);
+  }
+
+  // Use IntersectionObserver for high-performance ScrollSpy
+  if ("IntersectionObserver" in window) {
+    const observerOptions = {
+      root: null,
+      rootMargin: "-25% 0px -55% 0px", // Triggers when section occupies the active view area
+      threshold: 0
+    };
+
+    const spyObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute("id");
+          navLinks.forEach((link) => {
+            link.classList.toggle("is-active", link.getAttribute("href") === `#${id}`);
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach((section) => spyObserver.observe(section));
+  } else {
+    // Fallback for older browsers
+    window.addEventListener("scroll", () => {
+      let current = null;
+      sections.forEach((section) => {
+        if (section.getBoundingClientRect().top <= 130) current = section;
+      });
+      navLinks.forEach((link) => {
+        link.classList.toggle("is-active", current && link.getAttribute("href") === `#${current.id}`);
+      });
+    });
+  }
 }
 
 function setupContactForm() {
@@ -511,8 +633,18 @@ function setupContactForm() {
       });
 
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || "Submission failed");
+        let errorMsg = "Submission failed";
+        try {
+          const data = await response.json();
+          if (data.error) {
+            errorMsg = data.error;
+          } else if (data.errors && data.errors.length > 0) {
+            errorMsg = data.errors.map(err => err.message).join(", ");
+          }
+        } catch (e) {
+          // Response not JSON
+        }
+        throw new Error(errorMsg);
       }
 
       contactForm.reset();
@@ -543,10 +675,18 @@ function setupContactForm() {
       }
       
     } catch (error) {
+      console.error("Formspree submission error:", error);
+      let displayError = "Could not send message. Please try emailing directly at gajjarsk111@gmail.com";
+      if (error.message && error.message !== "Submission failed" && error.message !== "Failed to fetch") {
+        displayError = `Submission failed: ${error.message}. Or email directly at gajjarsk111@gmail.com`;
+      } else if (error.message === "Failed to fetch") {
+        displayError = "Network error. Please check your internet connection or email directly at gajjarsk111@gmail.com";
+      }
+      
       if (error.message && error.message.toLowerCase().includes("recaptcha")) {
         alert("Developer Note: To submit without redirecting, please go to your Formspree settings and disable reCAPTCHA for this form.");
       }
-      if (note) note.textContent = "Could not send message. Please try emailing directly at gajjarsk111@gmail.com";
+      if (note) note.textContent = displayError;
     } finally {
       contactForm.classList.remove("is-submitting");
       if (submitButton) submitButton.textContent = defaultButtonText;
@@ -645,6 +785,21 @@ function setupChatbot() {
     ask(input.value);
     input.value = "";
   });
+
+  // Hide chatbot when scrolled to the absolute bottom to prevent obstructing "Back to top" button
+  const updateChatbotVisibility = () => {
+    const isLargeScreen = window.innerWidth > 900;
+    if (!isLargeScreen) {
+      chatbot.classList.remove("is-hidden-footer");
+      return;
+    }
+    const isAtBottom = window.scrollY > 100 && (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 150);
+    chatbot.classList.toggle("is-hidden-footer", isAtBottom);
+  };
+
+  window.addEventListener("scroll", updateChatbotVisibility);
+  window.addEventListener("resize", updateChatbotVisibility);
+  updateChatbotVisibility();
 }
 
 function setupParticles() {
@@ -653,10 +808,12 @@ function setupParticles() {
 
   const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
   const particleScale = viewportWidth <= 680 ? 0.28 : viewportWidth <= 900 ? 0.42 : 1;
+  
+  // Reduced counts: Ring 1 (50->20), Ring 2 (80->35), Ring 3 (120->50) to lower DOM overhead
   const ringConfigs = [
-    { class: "orbit-ring-1", count: 50, size: [2, 4], speed: [15, 25] },
-    { class: "orbit-ring-2", count: 80, size: [2, 5], speed: [20, 35] },
-    { class: "orbit-ring-3", count: 120, size: [3, 6], speed: [25, 45] },
+    { class: "orbit-ring-1", count: 20, size: [2, 4], speed: [15, 25] },
+    { class: "orbit-ring-2", count: 35, size: [2, 5], speed: [20, 35] },
+    { class: "orbit-ring-3", count: 50, size: [3, 6], speed: [25, 45] },
   ].map((config) => ({
     ...config,
     count: Math.max(10, Math.round(config.count * particleScale)),
@@ -693,8 +850,9 @@ function setupParticles() {
         particle.classList.add("twinkle");
       }
       
+      // Use static blurs so GPU can cache rasterized shapes instead of constantly re-rasterizing animated filters
       if (Math.random() > 0.7) {
-        particle.style.filter = `blur(${Math.random() * 2}px)`;
+        particle.style.filter = `blur(${Math.floor(Math.random() * 2) + 1}px)`;
         particle.style.opacity = "0.6";
       }
 
@@ -833,15 +991,50 @@ function setupPersonalProjects() {
   });
 }
 
-loadChatKnowledge();
-setupProjects();
-setupNavigation();
-setupContactForm();
-setupChatbot();
-setupParticles();
-setupTerminal();
-setupMarquee();
-renderProjects();
-setupPersonalProjects();
-renderPersonalProjects();
-observeReveal();
+// Initialize all components with error boundaries to prevent one component from breaking others
+const initializers = [
+  { name: "Chat Knowledge", fn: loadChatKnowledge },
+  { name: "Projects Setup", fn: setupProjects },
+  { name: "Navigation", fn: setupNavigation },
+  { name: "Contact Form", fn: setupContactForm },
+  { name: "Chatbot", fn: setupChatbot },
+  { name: "Particles", fn: setupParticles },
+  { name: "Terminal", fn: setupTerminal },
+  { name: "Marquee", fn: setupMarquee },
+  { name: "Render Projects", fn: renderProjects },
+  { name: "Personal Projects Setup", fn: setupPersonalProjects },
+  { name: "Render Personal Projects", fn: () => renderPersonalProjects() },
+  { name: "Reveal Animations", fn: observeReveal }
+];
+
+initializers.forEach(init => {
+  try {
+    init.fn();
+  } catch (error) {
+    console.error(`Initialization failed for [${init.name}]:`, error);
+  }
+});
+
+// Fix: Ensure full page scroll on all viewports (iPad/tablet footer fix)
+(function fixScroll() {
+  function ensureScroll() {
+    const html = document.documentElement;
+    const body = document.body;
+    
+    html.style.setProperty("height", "auto", "important");
+    html.style.setProperty("min-height", "100%", "important");
+    html.style.setProperty("overflow-y", "scroll", "important");
+    html.style.setProperty("overflow-x", "hidden", "important");
+    
+    body.style.setProperty("height", "auto", "important");
+    body.style.setProperty("min-height", "100%", "important");
+    body.style.setProperty("overflow-y", "visible", "important");
+    body.style.setProperty("overflow-x", "visible", "important");
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", ensureScroll);
+  } else {
+    ensureScroll();
+  }
+  window.addEventListener("load", ensureScroll);
+})();
