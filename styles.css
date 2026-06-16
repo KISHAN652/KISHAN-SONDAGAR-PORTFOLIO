@@ -7231,6 +7231,23 @@ section,
     bottom: 24px !important;
     left: auto !important;
   }
+
+  /* Disable heavy background keyframe animations on mobile/tablet */
+  .site-bg,
+  .site-bg-sweep {
+    animation: none !important;
+  }
+
+  /* Hide hero orbit particles container */
+  .hero-orbit-particles {
+    display: none !important;
+  }
+
+  /* Disable heavy mask-image gradients on scrolling marquee ticker */
+  .skills-marquee-container {
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+  }
 }
 
 @media (max-width: 680px) {
