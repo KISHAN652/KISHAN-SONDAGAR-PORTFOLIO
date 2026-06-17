@@ -7357,3 +7357,10 @@ section,
     max-height: calc(100svh - 90px) !important;
   }
 }
+
+/* Prevent hero section from stretching vertically on portrait screens (like mobile devices in Desktop Site mode or vertical monitors) */
+@media (orientation: portrait) {
+  .hero {
+    min-height: auto !important;
+  }
+}
